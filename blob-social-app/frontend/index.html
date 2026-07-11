@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blob 🫧 — a tiny social app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Soft background decoration -->
+  <div class="bg-blob bg-blob--1"></div>
+  <div class="bg-blob bg-blob--2"></div>
+  <div class="bg-blob bg-blob--3"></div>
+
+  <!-- ============ TOP NAV ============ -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="logo" data-nav="feed">
+        <span class="logo__blob">🫧</span>
+        <span class="logo__text">Blob</span>
+      </div>
+
+      <div class="searchbox">
+        <span class="searchbox__icon">🔍</span>
+        <input id="searchInput" type="text" placeholder="find your people…" autocomplete="off" />
+        <div id="searchResults" class="search-results hidden"></div>
+      </div>
+
+      <nav class="topnav" id="authedNav" style="display:none;">
+        <button class="pill-btn pill-btn--ghost" data-nav="feed">Feed</button>
+        <button class="pill-btn pill-btn--ghost" id="myProfileNavBtn">Me</button>
+        <button class="pill-btn pill-btn--outline" id="logoutBtn">Log out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- ============ AUTH VIEW ============ -->
+    <section id="authView" class="view auth-view">
+      <div class="auth-card">
+        <div class="auth-card__blob">🫧</div>
+        <h1 class="auth-title">Welcome to Blob</h1>
+        <p class="auth-sub">a small, friendly corner of the internet — just for your people</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab is-active" data-tab="login">Log in</button>
+          <button class="auth-tab" data-tab="register">Sign up</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <label>Username or email
+            <input type="text" name="username" required placeholder="pixel_panda" />
+          </label>
+          <label>Password
+            <input type="password" name="password" required placeholder="••••••••" />
+          </label>
+          <button type="submit" class="pill-btn pill-btn--primary auth-submit">Log in</button>
+          <p class="auth-error" id="loginError"></p>
+        </form>
+
+        <form id="registerForm" class="auth-form hidden">
+          <label>Username
+            <input type="text" name="username" required minlength="3" placeholder="pixel_panda" />
+          </label>
+          <label>Email
+            <input type="email" name="email" required placeholder="you@example.com" />
+          </label>
+          <label>Password
+            <input type="password" name="password" required minlength="6" placeholder="at least 6 characters" />
+          </label>
+          <button type="submit" class="pill-btn pill-btn--primary auth-submit">Create account</button>
+          <p class="auth-error" id="registerError"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ FEED VIEW ============ -->
+    <section id="feedView" class="view feed-view hidden">
+      <div class="feed-layout">
+
+        <!-- Sidebar: my mini profile -->
+        <aside class="sidebar">
+          <div class="profile-card" id="miniProfileCard"></div>
+          <div class="suggestions-card">
+            <h3 class="card-heading">People to follow</h3>
+            <div id="suggestionsList"></div>
+          </div>
+        </aside>
+
+        <!-- Center: composer + posts -->
+        <div class="feed-center">
+          <div class="composer">
+            <div class="composer__avatar" id="composerAvatar"></div>
+            <div class="composer__body">
+              <textarea id="postContent" maxlength="500" placeholder="what's on your mind?"></textarea>
+              <div class="composer__footer">
+                <span class="char-count"><span id="charCount">0</span>/500</span>
+                <button class="pill-btn pill-btn--primary" id="postBtn">Post</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="feed-tabs">
+            <button class="feed-tab is-active" data-feed="all">Everyone</button>
+            <button class="feed-tab" data-feed="following">Following</button>
+          </div>
+
+          <div id="postsList" class="posts-list"></div>
+          <p id="emptyFeedMsg" class="empty-msg hidden">no posts here yet — be the first to share something!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PROFILE VIEW ============ -->
+    <section id="profileView" class="view profile-view hidden">
+      <div class="profile-header" id="profileHeader"></div>
+
+      <!-- Instagram-style highlights row -->
+      <div class="highlights-row" id="highlightsRow"></div>
+
+      <div class="profile-edit-card hidden" id="profileEditCard">
+        <h3 class="card-heading">Edit your profile</h3>
+        <label>Bio
+          <textarea id="editBio" maxlength="160" placeholder="tell people a little about yourself..."></textarea>
+        </label>
+        <label>Pick a vibe
+          <div class="emoji-picker" id="emojiPicker"></div>
+        </label>
+        <label>Pick a color
+          <div class="color-picker" id="colorPicker"></div>
+        </label>
+        <button class="pill-btn pill-btn--primary" id="saveProfileBtn">Save changes</button>
+      </div>
+      <div id="profilePostsList" class="posts-list"></div>
+    </section>
+
+  </main>
+
+  <!-- ============ HIGHLIGHT CREATE MODAL ============ -->
+  <div id="highlightModal" class="modal-overlay hidden">
+    <div class="highlight-modal__card">
+      <h3>New highlight</h3>
+      <label>Title
+        <input type="text" id="highlightTitleInput" maxlength="30" placeholder="e.g. Trips, Wins, Recipes" />
+      </label>
+      <label>Cover
+        <div class="emoji-picker" id="highlightEmojiPicker"></div>
+      </label>
+      <label>First moment
+        <textarea id="highlightFirstItem" maxlength="220" placeholder="write the first thing to save in here..."></textarea>
+      </label>
+      <div class="highlight-modal__actions">
+        <button class="pill-btn pill-btn--outline" id="highlightModalCancel">Cancel</button>
+        <button class="pill-btn pill-btn--primary" id="highlightModalSave">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STORY / HIGHLIGHT VIEWER ============ -->
+  <div id="storyViewer" class="story-viewer-overlay hidden">
+    <div class="story-viewer__card">
+      <div class="story-viewer__progress" id="storyProgress"></div>
+      <div class="story-viewer__head">
+        <div class="mini-avatar" id="storyAvatar"></div>
+        <div>
+          <div class="story-viewer__title" id="storyTitle"></div>
+          <div class="story-viewer__sub" id="storySub"></div>
+        </div>
+        <button class="story-viewer__close" id="storyClose">✕</button>
+      </div>
+      <div class="story-viewer__body">
+        <button class="story-viewer__tap-zone story-viewer__tap-zone--prev" id="storyPrev"></button>
+        <button class="story-viewer__tap-zone story-viewer__tap-zone--next" id="storyNext"></button>
+        <div class="story-viewer__text" id="storyText"></div>
+      </div>
+      <div class="story-viewer__add-form" id="storyAddForm">
+        <input type="text" id="storyAddInput" maxlength="220" placeholder="add another moment…" />
+        <button class="pill-btn" id="storyAddSubmit">Add</button>
+      </div>
+      <div class="story-viewer__footer" id="storyFooter">
+        <button class="story-viewer__add-btn" id="storyAddToggle">+ Add moment</button>
+        <button class="story-viewer__delete-btn" id="storyDeleteItem">Delete this</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CHAT BOT WIDGET (Blobby) ============ -->
+  <button class="chat-fab" id="chatFab" title="Chat with Blobby">
+    🤖
+    <span class="chat-fab__badge hidden" id="chatBadge"></span>
+  </button>
+  <div class="chat-panel hidden" id="chatPanel">
+    <div class="chat-panel__head">
+      <div class="chat-panel__avatar">🤖</div>
+      <div>
+        <div class="chat-panel__title">Blobby</div>
+        <div class="chat-panel__status">online</div>
+      </div>
+      <button class="chat-panel__close" id="chatClose">✕</button>
+    </div>
+    <div class="chat-panel__body" id="chatBody"></div>
+    <div class="chat-suggestions" id="chatSuggestions"></div>
+    <form class="chat-panel__inputrow" id="chatForm">
+      <input type="text" id="chatInput" placeholder="ask Blobby something…" maxlength="300" autocomplete="off" />
+      <button type="submit">➤</button>
+    </form>
+  </div>
+
+  <!-- Toast for little notifications -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
