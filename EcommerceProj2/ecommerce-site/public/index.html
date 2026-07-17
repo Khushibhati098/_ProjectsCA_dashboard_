@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ShopEase — General Store Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="utility-bar">FREE SHIPPING ON ORDERS OVER ₹1,999 · NO. 01 SINCE 2026</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">ShopEase</span>
+      <span class="brand-tag">General Store</span>
+    </a>
+    <form id="header-search-form" class="header-search">
+      <input id="header-search-input" type="text" placeholder="Search the catalog…" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
+    <div class="header-actions">
+      <a href="/cart.html" class="cart-link">
+        Cart <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </div>
+  <nav class="category-nav">
+    <div class="container" id="category-nav"></div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div>
+      <div class="hero-eyebrow">Catalog Edition — Vol. 1</div>
+      <h1>Goods worth&nbsp;keeping.</h1>
+      <p>A small, well-chosen catalog of electronics, footwear, home goods and accessories — picked for how they hold up, not just how they photograph.</p>
+    </div>
+    <div class="hero-meta">
+      <div><strong id="hero-count">—</strong>items in catalog</div>
+      <div><strong>Free</strong>returns within 30 days</div>
+      <div><strong>Ships</strong>within 2 business days</div>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+  <div class="section-heading">
+    <h2 id="listing-title">Full Catalog</h2>
+    <select class="sort-select" id="sort-select">
+      <option value="">Sort: Featured</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="rating">Top Rated</option>
+    </select>
+  </div>
+
+  <div id="product-grid" class="product-grid">
+    <div class="loading-row">Loading catalog…</div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span>© 2026 ShopEase General Store</span>
+    <span>Built with Express.js — a working demo storefront</span>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+  const state = {
+    category: 'All',
+    search: new URLSearchParams(window.location.search).get('search') || '',
+    sort: ''
+  };
+
+  async function loadCategories() {
+    const categories = await api.getCategories();
+    const nav = document.getElementById('category-nav');
+    const all = ['All', ...categories];
+    nav.innerHTML = all
+      .map(
+        (c) =>
+          `<a href="#" class="category-pill${c === state.category ? ' active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</a>`
+      )
+      .join('');
+
+    nav.querySelectorAll('.category-pill').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.category = el.dataset.cat;
+        document.querySelectorAll('.category-pill').forEach((p) => p.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('listing-title').textContent =
+          state.category === 'All' ? 'Full Catalog' : state.category;
+        loadProducts();
+      });
+    });
+  }
+
+  function renderProducts(products) {
+    const grid = document.getElementById('product-grid');
+    document.getElementById('hero-count').textContent = products.length;
+
+    if (!products.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <h3>No items match your search</h3>
+        <p>Try a different keyword or browse all categories.</p>
+        <a href="/index.html" class="btn btn-ghost">View Full Catalog</a>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = products
+      .map(
+        (p, i) => `
+      <div class="product-card">
+        <a href="/product.html?id=${p.id}" class="card-media">
+          <span class="catalog-tag">No. ${String(i + 1).padStart(2, '0')}</span>
+          <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" />
+        </a>
+        <div class="card-body">
+          <div class="card-category">${escapeHtml(p.category)}</div>
+          <a href="/product.html?id=${p.id}"><h3 class="card-title">${escapeHtml(p.name)}</h3></a>
+          <div class="card-desc">${escapeHtml(p.shortDescription)}</div>
+          <div class="card-footer">
+            <span class="price">${money(p.price)}</span>
+            <button class="btn btn-sm add-btn" data-id="${p.id}">Add to Cart</button>
+          </div>
+        </div>
+      </div>`
+      )
+      .join('');
+
+    grid.querySelectorAll('.add-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = 'Adding…';
+        await api.addToCart(parseInt(btn.dataset.id), 1);
+        await refreshCartCount();
+        showToast('Added to cart');
+        btn.disabled = false;
+        btn.textContent = 'Add to Cart';
+      });
+    });
+  }
+
+  async function loadProducts() {
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = '<div class="loading-row">Loading catalog…</div>';
+    const params = {};
+    if (state.category !== 'All') params.category = state.category;
+    if (state.search) params.search = state.search;
+    if (state.sort) params.sort = state.sort;
+    const products = await api.getProducts(params);
+    renderProducts(products);
+  }
+
+  document.getElementById('sort-select').addEventListener('change', (e) => {
+    state.sort = e.target.value;
+    loadProducts();
+  });
+
+  if (state.search) {
+    document.getElementById('header-search-input').value = state.search;
+    document.getElementById('listing-title').textContent = `Results for “${state.search}”`;
+  }
+
+  loadCategories();
+  loadProducts();
+</script>
+</body>
+</html>

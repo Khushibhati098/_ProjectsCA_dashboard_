@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Cart — ShopEase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="utility-bar">FREE SHIPPING ON ORDERS OVER ₹1,999 · NO. 01 SINCE 2026</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">ShopEase</span>
+      <span class="brand-tag">General Store</span>
+    </a>
+    <form id="header-search-form" class="header-search">
+      <input id="header-search-input" type="text" placeholder="Search the catalog…" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
+    <div class="header-actions">
+      <a href="/cart.html" class="cart-link">
+        Cart <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container cart-page">
+  <h1 class="page-title">Your Cart</h1>
+  <p class="page-subtitle">Review your items before checking out.</p>
+  <div id="cart-root">
+    <div class="loading-row">Loading cart…</div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span>© 2026 ShopEase General Store</span>
+    <span>Built with Express.js — a working demo storefront</span>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+  const root = document.getElementById('cart-root');
+
+  function rowTemplate(item) {
+    return `
+      <div class="cart-row" data-id="${item.productId}">
+        <img src="${item.image}" alt="${escapeHtml(item.name)}" />
+        <div>
+          <a href="/product.html?id=${item.productId}" class="cart-row-name">${escapeHtml(item.name)}</a>
+          <div class="cart-row-cat">${money(item.price)} each</div>
+          <button class="remove-link" data-id="${item.productId}">Remove</button>
+        </div>
+        <div class="qty-control">
+          <button type="button" class="qty-minus" data-id="${item.productId}">−</button>
+          <input type="text" class="qty-input" data-id="${item.productId}" value="${item.quantity}" inputmode="numeric" />
+          <button type="button" class="qty-plus" data-id="${item.productId}">+</button>
+        </div>
+        <div class="cart-row-subtotal">₹${money(item.subtotal)}</div>
+        <div></div>
+      </div>
+    `;
+  }
+
+  async function render() {
+    const cart = await api.getCart();
+
+    if (!cart.items.length) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <h3>Your cart is empty</h3>
+          <p>Browse the catalog to find something worth keeping.</p>
+          <a href="/index.html" class="btn">Browse Catalog</a>
+        </div>
+      `;
+      return;
+    }
+
+    const shippingEstimate = cart.total > 1999 ? 0 : 79;
+    const taxEstimate = +(cart.total * 0.18).toFixed(2);
+    const grandTotal = +(cart.total + shippingEstimate + taxEstimate).toFixed(2);
+
+    root.innerHTML = `
+      <div class="cart-layout">
+        <div>
+          <div class="cart-list">
+            ${cart.items.map(rowTemplate).join('')}
+          </div>
+          <div style="margin-top:20px">
+            <a href="/index.html" class="btn btn-ghost">← Continue Shopping</a>
+          </div>
+        </div>
+        <div class="summary-card">
+          <h3>Order Summary</h3>
+          <div class="summary-row"><span>Subtotal (${cart.itemCount} items)</span><span>₹${money(cart.total)}</span></div>
+          <div class="summary-row"><span>Shipping</span><span>${shippingEstimate === 0 ? 'Free' : '₹' + money(shippingEstimate)}</span></div>
+          <div class="summary-row"><span>GST (18%)</span><span>₹${money(taxEstimate)}</span></div>
+          <div class="summary-row total"><span>Total</span><span>₹${money(grandTotal)}</span></div>
+          <a href="/checkout.html" class="btn btn-full" style="margin-top:16px">Proceed to Checkout</a>
+        </div>
+      </div>
+    `;
+
+    root.querySelectorAll('.qty-minus').forEach((btn) =>
+      btn.addEventListener('click', async () => {
+        const input = root.querySelector(`.qty-input[data-id="${btn.dataset.id}"]`);
+        const newQty = Math.max(0, parseInt(input.value) - 1);
+        await api.updateCartItem(btn.dataset.id, newQty);
+        await refreshCartCount();
+        render();
+      })
+    );
+    root.querySelectorAll('.qty-plus').forEach((btn) =>
+      btn.addEventListener('click', async () => {
+        const input = root.querySelector(`.qty-input[data-id="${btn.dataset.id}"]`);
+        const newQty = parseInt(input.value) + 1;
+        await api.updateCartItem(btn.dataset.id, newQty);
+        await refreshCartCount();
+        render();
+      })
+    );
+    root.querySelectorAll('.qty-input').forEach((input) =>
+      input.addEventListener('change', async () => {
+        let v = parseInt(input.value) || 0;
+        await api.updateCartItem(input.dataset.id, v);
+        await refreshCartCount();
+        render();
+      })
+    );
+    root.querySelectorAll('.remove-link').forEach((btn) =>
+      btn.addEventListener('click', async () => {
+        await api.removeCartItem(btn.dataset.id);
+        await refreshCartCount();
+        showToast('Item removed');
+        render();
+      })
+    );
+  }
+
+  render();
+</script>
+</body>
+</html>

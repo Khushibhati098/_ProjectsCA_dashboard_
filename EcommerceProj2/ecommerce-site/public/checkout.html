@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout — ShopEase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="utility-bar">FREE SHIPPING ON ORDERS OVER ₹1,999 · NO. 01 SINCE 2026</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">ShopEase</span>
+      <span class="brand-tag">General Store</span>
+    </a>
+    <div class="header-actions" style="margin-left:auto">
+      <a href="/cart.html" class="cart-link">
+        Cart <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container cart-page">
+  <h1 class="page-title">Checkout</h1>
+  <p class="page-subtitle">Enter your shipping details and confirm your order.</p>
+  <div id="checkout-root">
+    <div class="loading-row">Loading…</div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span>© 2026 ShopEase General Store</span>
+    <span>Built with Express.js — a working demo storefront</span>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+  const root = document.getElementById('checkout-root');
+  let currentCart = null;
+  let selectedPayment = 'Cash on Delivery';
+
+  function fieldHtml(id, label, type = 'text', full = false, placeholder = '') {
+    return `
+      <div class="field${full ? ' full' : ''}" id="field-${id}">
+        <label for="${id}">${label}</label>
+        <input type="${type}" id="${id}" name="${id}" placeholder="${placeholder}" />
+        <div class="field-error">This field is required.</div>
+      </div>
+    `;
+  }
+
+  async function init() {
+    currentCart = await api.getCart();
+
+    if (!currentCart.items.length) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <h3>Your cart is empty</h3>
+          <p>Add something to the cart before checking out.</p>
+          <a href="/index.html" class="btn">Browse Catalog</a>
+        </div>
+      `;
+      return;
+    }
+
+    const shipping = currentCart.total > 1999 ? 0 : 79;
+    const tax = +(currentCart.total * 0.18).toFixed(2);
+    const total = +(currentCart.total + shipping + tax).toFixed(2);
+
+    root.innerHTML = `
+      <div class="checkout-layout">
+        <div>
+          <form id="checkout-form" novalidate>
+            <div class="form-section">
+              <h3><span class="step-num">1</span> Contact &amp; Shipping</h3>
+              <div class="form-grid">
+                ${fieldHtml('name', 'Full Name')}
+                ${fieldHtml('email', 'Email Address', 'email')}
+                ${fieldHtml('address', 'Street Address', 'text', true)}
+                ${fieldHtml('city', 'City')}
+                ${fieldHtml('zip', 'ZIP / Postal Code')}
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3><span class="step-num">2</span> Payment Method</h3>
+              <div class="payment-options" id="payment-options">
+                <label class="payment-option selected" data-value="Cash on Delivery">
+                  <input type="radio" name="payment" value="Cash on Delivery" checked /> Cash on Delivery
+                </label>
+                <label class="payment-option" data-value="Credit / Debit Card">
+                  <input type="radio" name="payment" value="Credit / Debit Card" /> Credit / Debit Card (demo — no real charge)
+                </label>
+                <label class="payment-option" data-value="UPI">
+                  <input type="radio" name="payment" value="UPI" /> UPI (demo — no real charge)
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-full" id="place-order-btn" style="padding:14px">Place Order — ₹${money(total)}</button>
+          </form>
+        </div>
+
+        <div class="summary-card">
+          <h3>Order Summary</h3>
+          <div class="mini-cart">
+            ${currentCart.items
+              .map(
+                (i) => `
+              <div class="mini-cart-row">
+                <img src="${i.image}" alt="${escapeHtml(i.name)}" />
+                <div class="name">${escapeHtml(i.name)} <span class="qty">×${i.quantity}</span></div>
+                <div class="amt">₹${money(i.subtotal)}</div>
+              </div>`
+              )
+              .join('')}
+          </div>
+          <div class="summary-row"><span>Subtotal</span><span>₹${money(currentCart.total)}</span></div>
+          <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? 'Free' : '₹' + money(shipping)}</span></div>
+          <div class="summary-row"><span>GST (18%)</span><span>₹${money(tax)}</span></div>
+          <div class="summary-row total"><span>Total</span><span>₹${money(total)}</span></div>
+        </div>
+      </div>
+    `;
+
+    document.querySelectorAll('.payment-option').forEach((label) => {
+      label.addEventListener('click', () => {
+        document.querySelectorAll('.payment-option').forEach((l) => l.classList.remove('selected'));
+        label.classList.add('selected');
+        label.querySelector('input').checked = true;
+        selectedPayment = label.dataset.value;
+      });
+    });
+
+    document.getElementById('checkout-form').addEventListener('submit', handleSubmit);
+  }
+
+  function validate() {
+    const required = ['name', 'email', 'address', 'city', 'zip'];
+    let valid = true;
+    required.forEach((id) => {
+      const input = document.getElementById(id);
+      const fieldWrap = document.getElementById(`field-${id}`);
+      const value = input.value.trim();
+      let ok = value.length > 0;
+      if (id === 'email' && ok) {
+        ok = /^\S+@\S+\.\S+$/.test(value);
+      }
+      fieldWrap.classList.toggle('error', !ok);
+      if (!ok) valid = false;
+    });
+    return valid;
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!validate()) {
+      showToast('Please fix the highlighted fields');
+      return;
+    }
+
+    const btn = document.getElementById('place-order-btn');
+    btn.disabled = true;
+    btn.textContent = 'Placing order…';
+
+    const customer = {
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      address: document.getElementById('address').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      zip: document.getElementById('zip').value.trim()
+    };
+
+    try {
+      const { order } = await api.placeOrder({ customer, paymentMethod: selectedPayment });
+      await refreshCartCount();
+      window.location.href = `/order-confirmation.html?id=${order.id}`;
+    } catch (err) {
+      showToast(err.message || 'Something went wrong');
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

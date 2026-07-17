@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order Confirmed — ShopEase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="utility-bar">FREE SHIPPING ON ORDERS OVER ₹1,999 · NO. 01 SINCE 2026</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">ShopEase</span>
+      <span class="brand-tag">General Store</span>
+    </a>
+    <div class="header-actions" style="margin-left:auto">
+      <a href="/cart.html" class="cart-link">
+        Cart <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container confirmation-page" id="confirmation-root">
+  <div class="loading-row">Loading order…</div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span>© 2026 ShopEase General Store</span>
+    <span>Built with Express.js — a working demo storefront</span>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+  const root = document.getElementById('confirmation-root');
+  const orderId = new URLSearchParams(window.location.search).get('id');
+
+  async function load() {
+    if (!orderId) {
+      root.innerHTML = `<h3>No order found</h3><a href="/index.html" class="btn">Back to Catalog</a>`;
+      return;
+    }
+    try {
+      const order = await api.getOrder(orderId);
+      const date = new Date(order.date).toLocaleString();
+
+      root.innerHTML = `
+        <div class="confirmation-badge">✓</div>
+        <h1 class="page-title">Order Confirmed</h1>
+        <p class="page-subtitle">Thank you, ${escapeHtml(order.customer.name)}. A confirmation has been recorded for your order.</p>
+        <div class="confirmation-id">${escapeHtml(order.id)}</div>
+
+        <div class="order-summary-box">
+          <div class="detail-meta-table" style="margin-top:0;border-top:none;padding-top:0">
+            <div><span>Placed</span><span>${date}</span></div>
+            <div><span>Status</span><span>${order.status}</span></div>
+            <div><span>Payment</span><span>${escapeHtml(order.paymentMethod)}</span></div>
+            <div><span>Ship to</span><span>${escapeHtml(order.customer.address)}, ${escapeHtml(order.customer.city)} ${escapeHtml(order.customer.zip)}</span></div>
+          </div>
+
+          <div class="mini-cart" style="margin-top:18px">
+            ${order.items
+              .map(
+                (i) => `
+              <div class="mini-cart-row">
+                <div class="name">${escapeHtml(i.name)} <span class="qty">×${i.quantity}</span></div>
+                <div class="amt">₹${money(i.subtotal)}</div>
+              </div>`
+              )
+              .join('')}
+          </div>
+
+          <div class="summary-row"><span>Subtotal</span><span>₹${money(order.subtotal)}</span></div>
+          <div class="summary-row"><span>Shipping</span><span>${order.shipping === 0 ? 'Free' : '₹' + money(order.shipping)}</span></div>
+          <div class="summary-row"><span>GST (18%)</span><span>₹${money(order.tax)}</span></div>
+          <div class="summary-row total"><span>Total Paid</span><span>₹${money(order.total)}</span></div>
+        </div>
+
+        <div style="margin-top:32px">
+          <a href="/index.html" class="btn">Continue Shopping</a>
+        </div>
+      `;
+    } catch (e) {
+      root.innerHTML = `<h3>Order not found</h3><a href="/index.html" class="btn">Back to Catalog</a>`;
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

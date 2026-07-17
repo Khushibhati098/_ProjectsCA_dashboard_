@@ -1,0 +1,134 @@
+[
+  {
+    "id": 1,
+    "name": "Aurora Wireless Headphones",
+    "category": "Electronics",
+    "price": 7499,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+    "rating": 4.6,
+    "stock": 24,
+    "shortDescription": "Over-ear wireless headphones with active noise cancellation.",
+    "description": "Immerse yourself in rich, balanced sound with the Aurora Wireless Headphones. Featuring active noise cancellation, 30-hour battery life, plush memory-foam ear cushions, and Bluetooth 5.3 for a stable connection. Perfect for commuting, working, or relaxing at home."
+  },
+  {
+    "id": 2,
+    "name": "Trailblazer Running Shoes",
+    "category": "Footwear",
+    "price": 5299,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
+    "rating": 4.3,
+    "stock": 40,
+    "shortDescription": "Lightweight running shoes with responsive cushioning.",
+    "description": "The Trailblazer Running Shoes combine a breathable knit upper with a responsive foam midsole, giving you a light, energetic stride whether you're training for a marathon or taking a morning jog. Durable rubber outsole grips the road and light trails alike."
+  },
+  {
+    "id": 3,
+    "name": "Nimbus Ceramic Coffee Mug Set",
+    "category": "Home & Kitchen",
+    "price": 1999,
+    "image": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&q=80",
+    "rating": 4.8,
+    "stock": 60,
+    "shortDescription": "Set of 4 handcrafted ceramic mugs, 12oz each.",
+    "description": "Start your mornings right with the Nimbus Ceramic Coffee Mug Set. Each mug is hand-glazed for a unique matte finish, holds 12oz of your favorite brew, and is microwave and dishwasher safe. Sold as a set of four in soft, neutral tones."
+  },
+  {
+    "id": 4,
+    "name": "Voyager Leather Backpack",
+    "category": "Accessories",
+    "price": 10799,
+    "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80",
+    "rating": 4.7,
+    "stock": 15,
+    "shortDescription": "Full-grain leather backpack with padded laptop sleeve.",
+    "description": "The Voyager Leather Backpack is crafted from full-grain leather that ages beautifully with use. It features a padded 15-inch laptop sleeve, multiple interior organizer pockets, and adjustable straps for all-day comfort. A timeless companion for work or travel."
+  },
+  {
+    "id": 5,
+    "name": "Pulse Smart Fitness Watch",
+    "category": "Electronics",
+    "price": 12499,
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80",
+    "rating": 4.4,
+    "stock": 32,
+    "shortDescription": "Track workouts, heart rate, and sleep in real time.",
+    "description": "Stay on top of your health with the Pulse Smart Fitness Watch. Continuous heart-rate monitoring, sleep tracking, 20+ workout modes, and a 7-day battery life keep you informed without needing to charge constantly. Water-resistant to 50 meters."
+  },
+  {
+    "id": 6,
+    "name": "Meadow Cotton Throw Blanket",
+    "category": "Home & Kitchen",
+    "price": 3299,
+    "image": "https://images.unsplash.com/photo-1600369672770-985fd30004eb?w=600&q=80",
+    "rating": 4.9,
+    "stock": 50,
+    "shortDescription": "Soft woven cotton blanket, perfect for any season.",
+    "description": "Wrap yourself in the Meadow Cotton Throw Blanket, woven from 100% breathable cotton for year-round comfort. Its generous 50x60 inch size makes it perfect for the couch, bed, or a picnic in the park. Machine washable and fade-resistant."
+  },
+  {
+    "id": 7,
+    "name": "Horizon Polarized Sunglasses",
+    "category": "Accessories",
+    "price": 2899,
+    "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600&q=80",
+    "rating": 4.2,
+    "stock": 70,
+    "shortDescription": "UV400 polarized lenses with a lightweight frame.",
+    "description": "Cut glare and protect your eyes with Horizon Polarized Sunglasses. The scratch-resistant polarized lenses block 100% of UVA/UVB rays, while the flexible lightweight frame stays comfortable from sunrise to sunset. Includes a protective hard case."
+  },
+  {
+    "id": 8,
+    "name": "Cascade Stainless Water Bottle",
+    "category": "Home & Kitchen",
+    "price": 1899,
+    "image": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80",
+    "rating": 4.6,
+    "stock": 90,
+    "shortDescription": "Double-wall insulated bottle keeps drinks cold 24 hours.",
+    "description": "The Cascade Stainless Water Bottle uses double-wall vacuum insulation to keep beverages cold for up to 24 hours or hot for up to 12. The leak-proof lid and durable powder-coated exterior make it a reliable companion for the gym, office, or trail."
+  },
+  {
+    "id": 9,
+    "name": "Drift Canvas Sneakers",
+    "category": "Footwear",
+    "price": 3699,
+    "image": "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&q=80",
+    "rating": 4.1,
+    "stock": 55,
+    "shortDescription": "Classic low-top canvas sneakers for everyday wear.",
+    "description": "The Drift Canvas Sneakers offer timeless style with a breathable canvas upper, cushioned insole, and a durable rubber sole for everyday comfort. Easy to dress up or down, they're a versatile addition to any wardrobe."
+  },
+  {
+    "id": 10,
+    "name": "Zenith Mechanical Keyboard",
+    "category": "Electronics",
+    "price": 8299,
+    "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80",
+    "rating": 4.7,
+    "stock": 18,
+    "shortDescription": "Tactile mechanical keyboard with RGB backlighting.",
+    "description": "Type with precision and style using the Zenith Mechanical Keyboard. Hot-swappable tactile switches, per-key RGB backlighting, and a durable aluminum frame make it a favorite among gamers and typists alike. Includes USB-C detachable cable."
+  },
+  {
+    "id": 11,
+    "name": "Solstice Linen Throw Pillow",
+    "category": "Home & Kitchen",
+    "price": 1599,
+    "image": "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=600&q=80",
+    "rating": 4.5,
+    "stock": 80,
+    "shortDescription": "Woven linen pillow cover with hidden zipper.",
+    "description": "Add texture and warmth to any room with the Solstice Linen Throw Pillow. The natural woven linen cover features a hidden zipper closure and comes in a versatile neutral tone that complements any decor style. Insert included."
+  },
+  {
+    "id": 12,
+    "name": "Ranger Canvas Messenger Bag",
+    "category": "Accessories",
+    "price": 6199,
+    "image": "https://images.unsplash.com/photo-1547949003-9792a18a2645?w=600&q=80",
+    "rating": 4.3,
+    "stock": 28,
+    "shortDescription": "Durable canvas messenger bag with leather trim.",
+    "description": "The Ranger Canvas Messenger Bag pairs rugged waxed canvas with genuine leather trim for a rugged-yet-refined look. Fits up to a 14-inch laptop, with an adjustable crossbody strap and multiple pockets for everyday essentials."
+  }
+]

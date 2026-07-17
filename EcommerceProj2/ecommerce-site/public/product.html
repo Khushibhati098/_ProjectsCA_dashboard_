@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Product Details — ShopEase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="utility-bar">FREE SHIPPING ON ORDERS OVER ₹1,999 · NO. 01 SINCE 2026</div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand">
+      <span class="brand-mark">ShopEase</span>
+      <span class="brand-tag">General Store</span>
+    </a>
+    <form id="header-search-form" class="header-search">
+      <input id="header-search-input" type="text" placeholder="Search the catalog…" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
+    <div class="header-actions">
+      <a href="/cart.html" class="cart-link">
+        Cart <span class="cart-count" id="cart-count">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container product-detail" id="product-detail-root">
+  <div class="loading-row">Loading product…</div>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <span>© 2026 ShopEase General Store</span>
+    <span>Built with Express.js — a working demo storefront</span>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+  const id = new URLSearchParams(window.location.search).get('id');
+  const root = document.getElementById('product-detail-root');
+
+  function stars(rating) {
+    const full = Math.round(rating);
+    return '★'.repeat(full) + '☆'.repeat(5 - full);
+  }
+
+  async function load() {
+    if (!id) {
+      root.innerHTML = `<div class="empty-state"><h3>No product selected</h3><a href="/index.html" class="btn">Back to Catalog</a></div>`;
+      return;
+    }
+    let product;
+    try {
+      product = await api.getProduct(id);
+    } catch (e) {
+      root.innerHTML = `<div class="empty-state"><h3>Product not found</h3><p>It may have been removed from the catalog.</p><a href="/index.html" class="btn">Back to Catalog</a></div>`;
+      return;
+    }
+
+    const lowStock = product.stock <= 10;
+
+    root.innerHTML = `
+      <div class="breadcrumb">
+        <a href="/index.html">Catalog</a> / <a href="/index.html">${escapeHtml(product.category)}</a> / ${escapeHtml(product.name)}
+      </div>
+      <div class="detail-grid">
+        <div class="detail-media">
+          <img src="${product.image}" alt="${escapeHtml(product.name)}" />
+        </div>
+        <div>
+          <div class="detail-category">${escapeHtml(product.category)}</div>
+          <h1 class="detail-title">${escapeHtml(product.name)}</h1>
+          <div class="detail-rating"><span class="stars">${stars(product.rating)}</span> ${product.rating.toFixed(1)} out of 5</div>
+          <div class="detail-price">${money(product.price)}</div>
+          <p class="detail-description">${escapeHtml(product.description)}</p>
+          <div class="stock-note ${lowStock ? 'low' : ''}">
+            ${lowStock ? `Only ${product.stock} left in stock — order soon` : `In stock — ${product.stock} available`}
+          </div>
+          <div class="qty-row">
+            <div class="qty-control">
+              <button type="button" id="qty-minus">−</button>
+              <input type="text" id="qty-input" value="1" inputmode="numeric" />
+              <button type="button" id="qty-plus">+</button>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn" id="add-to-cart-btn">Add to Cart</button>
+            <a href="/cart.html" class="btn btn-ghost">View Cart</a>
+          </div>
+          <div class="detail-meta-table">
+            <div><span>SKU</span><span>SE-${String(product.id).padStart(5, '0')}</span></div>
+            <div><span>Category</span><span>${escapeHtml(product.category)}</span></div>
+            <div><span>Shipping</span><span>2–4 business days</span></div>
+            <div><span>Returns</span><span>30-day window</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const qtyInput = document.getElementById('qty-input');
+    document.getElementById('qty-minus').addEventListener('click', () => {
+      qtyInput.value = Math.max(1, parseInt(qtyInput.value || '1') - 1);
+    });
+    document.getElementById('qty-plus').addEventListener('click', () => {
+      qtyInput.value = Math.min(product.stock, parseInt(qtyInput.value || '1') + 1);
+    });
+    qtyInput.addEventListener('change', () => {
+      let v = parseInt(qtyInput.value) || 1;
+      v = Math.max(1, Math.min(product.stock, v));
+      qtyInput.value = v;
+    });
+
+    document.getElementById('add-to-cart-btn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.textContent = 'Adding…';
+      await api.addToCart(product.id, parseInt(qtyInput.value) || 1);
+      await refreshCartCount();
+      showToast('Added to cart');
+      btn.disabled = false;
+      btn.textContent = 'Add to Cart';
+    });
+  }
+
+  load();
+</script>
+</body>
+</html>
